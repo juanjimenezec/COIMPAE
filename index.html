@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123b67">
+  <title>Cotizador COIMPAE</title>
+  <style>
+    :root {
+      --blue: #123b67;
+      --blue-2: #1d5a91;
+      --orange: #f28c28;
+      --gray-50: #f5f7fa;
+      --gray-100: #e9edf2;
+      --gray-500: #667085;
+      --gray-700: #344054;
+      --white: #ffffff;
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 18px 14px 28px;
+      background: linear-gradient(180deg, #eaf1f8 0%, #f5f7fa 260px);
+      color: #172b43;
+      font-family: "Nunito", "Trebuchet MS", Arial, sans-serif;
+    }
+    .app { width: 100%; max-width: 520px; margin: 0 auto; }
+    .header {
+      background: var(--blue);
+      color: white;
+      padding: 21px 22px;
+      border-radius: 22px;
+      box-shadow: 0 10px 26px rgba(18,59,103,.18);
+      position: relative;
+      overflow: hidden;
+    }
+    .header::after {
+      content: "";
+      position: absolute;
+      width: 130px; height: 130px;
+      border: 20px solid rgba(255,255,255,.08);
+      border-radius: 50%;
+      right: -34px; top: -50px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 900;
+      letter-spacing: .09em;
+      font-size: 13px;
+      color: #dceafa;
+    }
+    .brand-mark {
+      display: inline-grid; place-items: center;
+      width: 27px; height: 27px; border-radius: 8px;
+      background: var(--orange); color: white; font-weight: 900;
+      letter-spacing: 0;
+    }
+    h1 { font-size: clamp(24px, 6vw, 30px); line-height: 1.1; margin: 12px 0 6px; }
+    .subtitle { color: #d7e5f4; font-size: 14px; margin: 0; }
+    .card {
+      background: var(--white);
+      border: 1px solid rgba(18,59,103,.07);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-top: 14px;
+      box-shadow: 0 6px 20px rgba(22,42,66,.055);
+    }
+    .section-title {
+      margin: 0 0 15px; font-size: 16px; color: var(--blue);
+      font-weight: 900; display: flex; align-items: center; gap: 9px;
+    }
+    .step {
+      display: inline-grid; place-items: center; width: 25px; height: 25px;
+      background: #eaf2fb; color: var(--blue); border-radius: 8px; font-size: 12px;
+    }
+    label { display: block; font-weight: 800; color: var(--gray-700); font-size: 13px; margin: 0 0 7px; }
+    select, input {
+      display: block; width: 100%; min-height: 48px; border: 1px solid #d7dee7;
+      border-radius: 12px; padding: 12px 13px; background: #fff; color: #1d2939;
+      font: inherit; font-size: 15px; outline: none;
+    }
+    select:focus, input:focus { border-color: var(--blue-2); box-shadow: 0 0 0 3px rgba(29,90,145,.12); }
+    .field + .field { margin-top: 15px; }
+    .price-hint { display: flex; justify-content: space-between; gap: 10px; margin-top: 7px; color: var(--gray-500); font-size: 12px; }
+    .price-pill { color: var(--blue); font-weight: 900; }
+    .delivery-options { display: grid; gap: 8px; }
+    .delivery-option { position: relative; }
+    .delivery-option input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 1px; }
+    .delivery-option label {
+      border: 1px solid #d7dee7; border-radius: 12px; padding: 12px;
+      display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0;
+      min-height: 53px; transition: border-color .15s, background .15s;
+    }
+    .radio-dot { width: 18px; height: 18px; flex: 0 0 18px; border: 2px solid #98a2b3; border-radius: 50%; position: relative; }
+    .delivery-option input:checked + label { border-color: var(--blue-2); background: #f0f6fc; }
+    .delivery-option input:checked + label .radio-dot { border-color: var(--blue-2); }
+    .delivery-option input:checked + label .radio-dot::after { content: ""; position: absolute; inset: 3px; background: var(--blue-2); border-radius: 50%; }
+    .delivery-copy { flex: 1; }
+    .delivery-name { font-size: 13px; font-weight: 800; color: var(--gray-700); }
+    .delivery-cost { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+    .delivery-amount { font-size: 13px; font-weight: 900; color: var(--blue); white-space: nowrap; }
+    .primary-btn, .secondary-btn {
+      border: 0; border-radius: 13px; min-height: 50px; width: 100%;
+      padding: 13px 16px; font: inherit; font-weight: 900; font-size: 15px;
+      cursor: pointer; transition: transform .08s, filter .15s;
+    }
+    .primary-btn { color: #fff; background: var(--orange); box-shadow: 0 5px 12px rgba(242,140,40,.22); margin-top: 17px; }
+    .secondary-btn { color: var(--blue); background: #eaf2fb; margin-top: 10px; }
+    button:active { transform: scale(.99); }
+    button:hover { filter: brightness(.98); }
+    .result { display: none; }
+    .result.visible { display: block; }
+    .result-top { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+    .result-label { color: var(--gray-500); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+    .total { font-size: clamp(31px, 8vw, 40px); line-height: 1.1; color: var(--blue); font-weight: 1000; margin-top: 5px; letter-spacing: -.03em; }
+    .total small { font-size: 15px; letter-spacing: 0; }
+    .tag { background: #fff0df; color: #9a4b00; border-radius: 999px; padding: 6px 9px; font-size: 11px; font-weight: 900; white-space: nowrap; }
+    .breakdown { border-top: 1px solid var(--gray-100); margin-top: 16px; padding-top: 12px; }
+    .line { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 6px 0; font-size: 13px; }
+    .line span:first-child { color: var(--gray-500); }
+    .line strong { color: var(--gray-700); text-align: right; }
+    .line.grand { border-top: 1px dashed #d7dee7; margin-top: 6px; padding-top: 12px; font-size: 15px; }
+    .line.grand span:first-child, .line.grand strong { color: var(--blue); font-weight: 900; }
+    .summary-preview {
+      background: var(--gray-50); border: 1px dashed #d3dce7; border-radius: 12px;
+      padding: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px;
+      color: var(--gray-700); line-height: 1.55; margin-top: 13px;
+    }
+    .toast { display: none; text-align: center; color: #17603b; background: #e8f7ee; border-radius: 10px; padding: 9px; font-size: 13px; font-weight: 800; margin-top: 10px; }
+    .toast.visible { display: block; }
+    .footer { text-align: center; color: #7a8696; font-size: 11px; margin: 16px 0 0; }
+    @media (min-width: 440px) {
+      body { padding-top: 26px; }
+      .card { padding: 20px; }
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .app { max-width: 100%; }
+      .header { box-shadow: none; border-radius: 0; }
+      .form-card, .footer, .secondary-btn, .primary-btn { display: none !important; }
+      .result { display: block !important; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="brand"><span class="brand-mark">C</span> COIMPAE</div>
+      <h1>Cotizador COIMPAE</h1>
+      <p class="subtitle">Calcula tu pedido y compártelo por WhatsApp.</p>
+    </header>
+
+    <section class="card form-card" aria-labelledby="form-title">
+      <h2 class="section-title" id="form-title"><span class="step">1</span> Detalle del pedido</h2>
+      <div class="field">
+        <label for="product">Producto</label>
+        <select id="product">
+          <option value="manga">Manga 12p</option>
+          <option value="odf">ODF 4p</option>
+          <option value="drop">Fibra óptica drop</option>
+          <option value="conversores">Conversores</option>
+        </select>
+        <div class="price-hint"><span>Precio unitario</span><span class="price-pill" id="unit-price">$12,00</span></div>
+      </div>
+      <div class="field">
+        <label for="quantity">Cantidad</label>
+        <input id="quantity" type="number" min="1" step="1" value="1" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>Canal de entrega</label>
+        <div class="delivery-options">
+          <div class="delivery-option">
+            <input type="radio" name="delivery" id="pickup" value="pickup" checked>
+            <label for="pickup">
+              <span class="radio-dot"></span>
+              <span class="delivery-copy"><span class="delivery-name">Recojo en punto de venta</span><br><span class="delivery-cost">Sin costo adicional</span></span>
+              <span class="delivery-amount">$0,00</span>
+            </label>
+          </div>
+          <div class="delivery-option">
+            <input type="radio" name="delivery" id="quito" value="quito">
+            <label for="quito">
+              <span class="radio-dot"></span>
+              <span class="delivery-copy"><span class="delivery-name">Delivery en Quito</span><br><span class="delivery-cost">Tarifa fija por pedido</span></span>
+              <span class="delivery-amount">+$5,00</span>
+            </label>
+          </div>
+          <div class="delivery-option">
+            <input type="radio" name="delivery" id="province" value="province">
+            <label for="province">
+              <span class="radio-dot"></span>
+              <span class="delivery-copy"><span class="delivery-name">Delivery en provincia</span><br><span class="delivery-cost">Tarifa fija por pedido</span></span>
+              <span class="delivery-amount">+$20,00</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <button class="primary-btn" id="calculate" type="button">Calcular pedido <span aria-hidden="true">→</span></button>
+    </section>
+
+    <section class="card result" id="result" aria-live="polite" aria-labelledby="result-title">
+      <div class="result-top">
+        <div>
+          <div class="result-label" id="result-title">Total del pedido</div>
+          <div class="total" id="total">$12,00</div>
+        </div>
+        <span class="tag">COIMPAE</span>
+      </div>
+      <div class="breakdown">
+        <div class="line"><span>Producto</span><strong id="summary-product">Manga 12p × 1</strong></div>
+        <div class="line"><span>Subtotal productos</span><strong id="subtotal">$12,00</strong></div>
+        <div class="line"><span>Entrega</span><strong id="delivery-fee">$0,00</strong></div>
+        <div class="line grand"><span>Total a pagar</span><strong id="total-line">$12,00</strong></div>
+      </div>
+      <div class="summary-preview" id="summary-preview"></div>
+      <button class="secondary-btn" id="copy" type="button">Copiar resumen para WhatsApp</button>
+      <button class="primary-btn" id="print" type="button">Imprimir / Guardar PDF</button>
+      <div class="toast" id="toast" role="status">Resumen copiado. ¡Listo para pegar en WhatsApp!</div>
+    </section>
+    <p class="footer">Cotizador interno · Precios en dólares estadounidenses (USD)</p>
+  </main>
+
+  <script>
+    const products = {
+      manga: { name: "Manga 12p", price: 12 },
+      odf: { name: "ODF 4p", price: 4 },
+      drop: { name: "Fibra óptica drop", price: 130 },
+      conversores: { name: "Conversores", price: 23 }
+    };
+    const deliveryOptions = {
+      pickup: { name: "Recojo en punto de venta", fee: 0 },
+      quito: { name: "Delivery en Quito", fee: 5 },
+      province: { name: "Delivery en provincia", fee: 20 }
+    };
+
+    const productSelect = document.getElementById("product");
+    const quantityInput = document.getElementById("quantity");
+    const unitPrice = document.getElementById("unit-price");
+    const result = document.getElementById("result");
+    const toast = document.getElementById("toast");
+    let currentSummary = "";
+
+    function money(value) {
+      return new Intl.NumberFormat("es-EC", {
+        style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    function selectedDelivery() {
+      const checked = document.querySelector('input[name="delivery"]:checked');
+      return deliveryOptions[checked ? checked.value : "pickup"];
+    }
+
+    function updateUnitPrice() {
+      unitPrice.textContent = money(products[productSelect.value].price);
+    }
+
+    function calculateOrder() {
+      const product = products[productSelect.value];
+      const rawQuantity = Number(quantityInput.value);
+      if (!Number.isFinite(rawQuantity) || rawQuantity < 1 || !Number.isInteger(rawQuantity)) {
+        quantityInput.setCustomValidity("Ingresa una cantidad entera igual o mayor que 1.");
+        quantityInput.reportValidity();
+        quantityInput.setCustomValidity("");
+        quantityInput.focus();
+        return;
+      }
+
+      const quantity = rawQuantity;
+      const delivery = selectedDelivery();
+      const subtotal = product.price * quantity;
+      const total = subtotal + delivery.fee;
+
+      document.getElementById("total").textContent = money(total);
+      document.getElementById("summary-product").textContent = `${product.name} × ${quantity}`;
+      document.getElementById("subtotal").textContent = money(subtotal);
+      document.getElementById("delivery-fee").textContent = money(delivery.fee);
+      document.getElementById("total-line").textContent = money(total);
+
+      currentSummary = [
+        "🧾 *Cotización COIMPAE*",
+        "",
+        `Producto: ${product.name}`,
+        `Cantidad: ${quantity}`,
+        `Precio unitario: ${money(product.price)}`,
+        `Subtotal: ${money(subtotal)}`,
+        `Entrega: ${delivery.name}`,
+        `Costo de entrega: ${money(delivery.fee)}`,
+        "",
+        `*TOTAL: ${money(total)}*`,
+        "",
+        "Precios en USD."
+      ].join("\n");
+
+      document.getElementById("summary-preview").textContent = currentSummary;
+      result.classList.add("visible");
+      toast.classList.remove("visible");
+      result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    async function copySummary() {
+      if (!currentSummary) calculateOrder();
+      if (!currentSummary) return;
+
+      try {
+        await navigator.clipboard.writeText(currentSummary);
+      } catch (error) {
+        const textarea = document.createElement("textarea");
+        textarea.value = currentSummary;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const copied = document.execCommand("copy");
+        textarea.remove();
+        if (!copied) {
+          window.prompt("Copia este resumen para WhatsApp:", currentSummary);
+          return;
+        }
+      }
+      toast.classList.add("visible");
+      document.getElementById("copy").textContent = "¡Copiado!";
+      window.setTimeout(() => {
+        toast.classList.remove("visible");
+        document.getElementById("copy").textContent = "Copiar resumen para WhatsApp";
+      }, 2400);
+    }
+
+    productSelect.addEventListener("change", updateUnitPrice);
+    document.getElementById("calculate").addEventListener("click", calculateOrder);
+    document.getElementById("copy").addEventListener("click", copySummary);
+    document.getElementById("print").addEventListener("click", () => window.print());
+
+    updateUnitPrice();
+  </script>
+</body>
+</html>
